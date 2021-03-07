@@ -18,9 +18,8 @@ rm -f installer;
 mv composer.phar composer;
 sed -i '/alias composer=.*/d' ~/.bashrc;
 echo 'alias composer="php -d allow_url_fopen=On /home/$USER/bin/composer"' >> ~/.bashrc;
-source ~/.bashrc;
+source ~/.bashrc; # this does not seem to be working
 cd $dir_path;
-exec bash;
-#bash --login;
+exec bash; # seems to create a new shell so I have to type exit twice I would prefer to avoid this
 composer self-update;
 composer -V;

@@ -1,0 +1,98 @@
+#!/bin/bash
+######################################################
+#install wordpress iwp.sh
+#install wordpress from command line
+#requires wp command line tools
+##
+#parameters
+#-h|-dbhost localhost etc...
+#-n|-dbname schema_db
+#-u|-dbuser schema_dba
+#-p|-dbpass schema_password
+#-l|-url domain.com
+#-t|-title stie title
+#-a|-admin_name wordpress admin username
+#-w|-admin_password wordpress password
+#-m|-admin_email admin email address
+##
+#usage:
+#./iwp.sh --dbhost=localhost --dbname=aboyce_tdb --dbuser=aboyce_tdba --dbpass="******" --url="andreboyce.com/test" --title="andreboyce" --admin_name="aboyce" --admin_password="******" --admin_email="email@domain.com"
+######################################################
+
+for i in "$@"
+do
+case $i in
+    -h=*|--dbhost=*)
+    dbhost="${i#*=}"
+    shift # past argument=value
+    ;;
+    -n=*|--dbname=*)
+    dbname="${i#*=}"
+    shift # past argument=value
+    ;;
+    -u=*|--dbuser=*)
+    dbuser="${i#*=}"
+    shift # past argument=value
+    ;;
+    -p=*|--dbpass=*)
+    dbpass="${i#*=}"
+    shift # past argument=value
+    ;;
+    -l=*|--url=*)
+    url="${i#*=}"
+    shift # past argument=value
+    ;;
+    -t=*|--title=*)
+    title="${i#*=}"
+    shift # past argument=value
+    ;;
+    -a=*|--admin_name=*)
+    admin_name="${i#*=}"
+    shift # past argument=value
+    ;;
+    -w=*|--admin_password=*)
+    admin_password="${i#*=}"
+    shift # past argument=value
+    ;;
+    -m=*|--admin_email=*)
+    admin_email="${i#*=}"
+    shift # past argument=value
+    ;;
+    --default)
+    DEFAULT=YES
+    shift # past argument with no value
+    ;;
+    *)
+          # unknown option
+    ;;
+esac
+done
+
+echo "dbhost=$dbhost dbname=$dbname dbuser=$dbuser dbpass=$dbpass url=$url title=$title admin_name=$admin_name admin_password=$admin_password admin_email=$admin_email";
+
+if [ -x "$(command -v wp)" ]; then
+  :
+else
+  echo "wp cli tools not found in path. please install add wp to path";
+  exit 1;
+fi
+
+wget http://wordpress.org/latest.tar.gz
+tar -zxvf latest.tar.gz
+rm -f latest.tar.gz
+cd wordpress
+mv * .[^.] .??* ..
+cd ..
+rm -rf ./wordpress
+
+#create wp-config.php
+wp core config --dbhost=$dbhost --dbname=$dbname --dbuser=$dbuser --dbpass=$dbpass
+
+chmod 644 wp-config.php
+
+#call wp core install, wp command line tools must be installed
+wp core install --url=$url --title=$title --admin_name=$admin_name --admin_password=$admin_password --admin_email=$admin_email
+
+#clear history to erase password from command line history
+history -c && exit 
+######################################################
