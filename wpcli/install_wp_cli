@@ -1,0 +1,34 @@
+#!/bin/bash
+# install wp-cli https://wp-cli.org/
+# todo allow sudo instead of just using root
+
+# check if user is root
+if [[ $EUID -ne 0 ]]; 
+   then
+      # user is not root
+      echo "This script must be run as root";
+      exit 1;
+   else
+      # user is root
+      :
+fi
+
+mkdir -p ~/wpcli;
+cd ~/wpcli;
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar;
+chmod +x wp-cli.phar;
+sudo mv wp-cli.phar /usr/local/bin/wp;
+echo "export WP_CLI_PACKAGES_DIR=/usr/local/lib/wp-cli-packages" > /etc/profile.d/wp-cli.sh;
+wp --info;
+
+# find php ini
+# php -i | grep "Loaded Configuration File"
+PHPINI=$(php -i | grep "Loaded Configuration File" | sed 's/Loaded Configuration File => //');
+#echo ${PHPINI};
+yes | cp --backup=numbered ${PHPINI} ${PHPINI}.bak;
+# replace memory_limit = 128M with memory_limit = 1024M;
+sed -i 's/memory_limit = .*/memory_limit = 1024M/g' ${PHPINI};
+
+# install wp-cli/find-command
+wp --allow-root package install wp-cli/find-command;
+wp --allow-root cli update;
