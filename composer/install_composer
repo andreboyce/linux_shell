@@ -1,0 +1,20 @@
+#!/bin/bash
+# install composer
+# Note: Multiple versions of PHP had to be disabled inorder for the composer instalation to work.
+
+# need to fix
+
+echo "install composer";
+
+composer_url="https://getcomposer.org/installer";
+mkdir -p "/home/$USER/bin";
+cd "/home/$USER/bin";
+wget $composer_url;
+php -d allow_url_fopen=On installer -check;
+php installer;
+rm -f installer;
+echo 'alias composer="php -d allow_url_fopen=On /home/$USER/bin/composer.phar"' >> ~/.bashrc;
+source ~/.bashrc;
+#composer -V;
+composer self-update;
+composer -V;
