@@ -1,0 +1,23 @@
+#!/bin/bash
+# bash settings
+
+#https://phoenixnap.com/kb/change-bash-prompt-linux
+
+yes | sudo cp --backup=numbered ~/.bashrc ~/.bashrc.bak;
+
+#user@hostname ip os path
+#[$USER]@[$HOSTNAME] [$SSH_CLIENT_IP] [$LINUX_OS] [$(pwd)]
+sed -i '/LINUX_OS.*/d' ~/.bashrc;
+echo 'LINUX_OS=$(hostnamectl | grep -i "Operating System: " | sed "s/Operating System: //" | sed "s/^ *//g" );' >> ~/.bashrc;
+sed -i '/SSH_CLIENT_IP.*/d' ~/.bashrc;
+echo 'SSH_CLIENT_IP=$(echo $SSH_CLIENT | awk '\''{ print $1}'\'');' >> ~/.bashrc;
+sed -i '/PROMPT_COMMAND.*/d' ~/.bashrc;
+echo 'PROMPT_COMMAND='\''echo -ne "\e]0;[$USER]@[$HOSTNAME] [$SSH_CLIENT_IP] [$LINUX_OS] [$(pwd)]\a"'\''' >> ~/.bashrc;
+sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' ~/.bashrc;
+cat ~/.bashrc;
+
+#user@hostname
+sed -i '/export PS1.*/d' ~/.bashrc;
+echo 'export PS1="[\u@\H \W]\$"' >> ~/.bashrc;
+sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' ~/.bashrc;
+cat ~/.bashrc;

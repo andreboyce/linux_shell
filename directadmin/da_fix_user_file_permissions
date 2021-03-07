@@ -1,0 +1,29 @@
+#!/bin/bash
+# fix user file permissions
+# sometimes files in the user public_html directory may be incorrectly owned by root
+# this script will
+# make sure all the files in /home/$USER/public_html/ belong to $USER;
+
+
+# check if user is root
+if [[ $EUID -ne 0 ]]; 
+   then
+      # user is not root
+      echo "This script must be run as root";
+      exit 1;
+   else
+      # user is root
+      :
+fi
+
+for i in `ls /usr/local/directadmin/data/users`; do
+{
+    COUNT=`grep -c usertype=user /usr/local/directadmin/data/users/$i/user.conf`
+    if [ "$COUNT" -eq 0 ]; then
+        continue;
+    fi
+
+    echo "Updating User $i";
+    chown -R $i:$i /home/$i/public_html/;
+};
+done;

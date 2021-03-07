@@ -1,0 +1,24 @@
+#!/bin/bash
+# vim settings
+
+#https://www.shortcutfoo.com/blog/top-50-vim-configuration-options/
+yes | sudo cp --backup=numbered ~/.vimrc ~/.vimrc.bak;
+# high light search
+sed -i '/set hlsearch/d' ~/.vimrc; 
+echo 'set hlsearch' >> ~/.vimrc;
+# ignore case
+sed -i '/set ignorecase/d' ~/.vimrc;
+echo 'set ignorecase' >> ~/.vimrc;
+# indent using 3 spacing
+sed -i '/set tabstop=3/d' ~/.vimrc;
+echo 'set tabstop=3' >> ~/.vimrc;
+# syntax hilighting
+sed -i '/syntax enable/d' ~/.vimrc;
+echo 'syntax enable' >> ~/.vimrc;
+# show numbers
+sed -i '/set number/d' ~/.vimrc;
+echo 'set number' >> ~/.vimrc;
+# hilight line
+sed -i '/set cursorline/d' ~/.vimrc;
+echo 'set cursorline' >> ~/.vimrc;
+cat ~/.vimrc;
