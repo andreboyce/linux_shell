@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# update all wordpress sites in a vps
+
+#note if you get memory issues
+#change memory limit to 512
+#php -i | grep php.ini
+#memory_limit = 512M
+
+# there may be a bug where updated files have ownership by root, if so have to fix that
+
+# check if user is root
+if [[ $EUID -ne 0 ]]; 
+   then
+      # user is not root
+      echo "This script must be run as root";
+      exit 1;
+   else
+      # user is root
+      :
+fi
+
+wp cli update;
+wp --allow-root find /home | awk '{if(NR>1)print $1}' | sed 's/\/wp-includes\/version\.php//g' | xargs -I{} sh -c 'dir={} && user=$(stat -c %U $dir) && echo $user && su $user -c "\
+wp --allow-root --path={} cache flush; \
+wp --allow-root --path={} cli cache clear; \
+wp --allow-root --path={} core verify-checksums; \
+wp --allow-root --path={} core update; \
+wp --allow-root --path={} plugin update --all; \
+wp --allow-root --path={} theme update --all"';

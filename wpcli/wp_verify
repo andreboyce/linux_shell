@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# verify wordpress core untampered
+# useful if any websites have been hacked
+
+# check if user is root
+if [[ $EUID -ne 0 ]]; 
+   then
+      # user is not root
+      echo "This script must be run as root";
+      exit 1;
+   else
+      # user is root
+      :
+fi
+
+wp --allow-root find /home | awk '{if(NR>1)print $1}' | sed 's/\/wp-includes\/version\.php//g' | xargs -I{} sh -c 'dir={} && user=$(stat -c %U $dir) && echo $user && su $user -c "wp --allow-root --path={} core verify-checksums"';
