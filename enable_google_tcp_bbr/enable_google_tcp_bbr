@@ -1,0 +1,111 @@
+# author: andre boyce
+# license: GPLV2
+# version: 1
+
+# copy paste ready
+# Enable Google’s TCP BBR on a Linux VPS
+# creates 2 files enable_google_tcp_bbr disable_google_tcp_bbr
+# todo maybe add quiet option
+# maybe make sed commands fit on one line
+
+# make a directory called scripts in the home directory
+mkdir -p ~/scripts
+# move in to the scripts directory
+cd ~/scripts
+# create a file called enable_google_tcp_bbr
+touch enable_google_tcp_bbr
+# make the file executable
+chmod +x enable_google_tcp_bbr
+
+# echo this script in to the file
+echo '
+# Enable Google’s TCP BBR on a Linux VPS
+# tested on ununtu 20.04, centos 8
+# run as root or as user with sudo
+# get the major_version of the kernel by splitting the result of uname -r by "." first column. e.g. 2.4.0 should give 2
+major_version=$(uname -r | awk -F"." '\''{print $1}'\'')
+# get the minor_version of the kernel by splitting the result of uname -r by "." second column.  e.g. 2.4.0 should give 4
+minor_version=$(uname -r | awk -F"." '\''{print $2}'\'')
+# if major_version of kernel less than 4.x.x
+if [ "$major_version" -lt "4" ]
+then
+   echo "Kernel version is: $major_version.$minor_version which is too low please upgrade kernel to version 4.9.0 or greater"
+   echo -e "\033[0;31mFailed\033[m" && exit 1;
+else
+   # if major_version of kernel is equal to 4.x.x then check if minor version less than 6   
+   if [ "$major_version" -eq "4" ] && [ $minor_version -lt "9" ]
+   then
+      echo "Kernel version is: $major_version.$minor_version which is too low please upgrade kernel to version 4.9.0 or greater"
+      echo -e "\033[0;31mFailed\033[m" && exit 1;
+   else
+      echo "Kernel version is: $major_version.$minor_version which is ok"
+   fi
+fi
+# backup /etc/sysctl.conf
+yes | sudo cp /etc/sysctl.conf /etc/sysctl.conf.bak
+# if we find "net.core.default_qdisc=fq" in /etc/sysctl.conf
+if sudo grep -Fq "net.core.default_qdisc=fq" /etc/sysctl.conf
+then
+   # echo "net.core.default_qdisc=fq present in /etc/sysctl.conf"
+   :
+else
+   echo "net.core.default_qdisc=fq" | sudo tee -a /etc/sysctl.conf
+fi
+# if we find "net.ipv4.tcp_congestion_control=bbr" in /etc/sysctl.conf
+if sudo grep -Fq "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf
+then
+   # echo "net.ipv4.tcp_congestion_control=bbr present in /etc/sysctl.conf"
+   :
+else
+   echo "net.ipv4.tcp_congestion_control=bbr" | sudo tee -a /etc/sysctl.conf
+fi
+# show differences
+# sudo diff /etc/sysctl.conf /etc/sysctl.conf.bak
+# Reload configuration
+sudo sysctl -qp
+# if it worked then expected output net.ipv4.tcp_congestion_control = bbr
+if sudo sysctl net.ipv4.tcp_congestion_control | grep -q "net.ipv4.tcp_congestion_control = bbr" ; then echo -e "\033[0;32mSuccess\033[m" && exit 0; else echo -e "\033[0;31mFailed\033[m" && exit 1; fi
+' > ~/scripts/enable_google_tcp_bbr
+
+# execute the script we created
+./enable_google_tcp_bbr
+
+# create another file to disable google_tcp_bbr
+touch disable_google_tcp_bbr
+chmod +x disable_google_tcp_bbr
+
+cat > ~/scripts/disable_google_tcp_bbr << EOF
+# remove net.core.default_qdisc=fq from /etc/sysctl.conf
+# remove net.ipv4.tcp_congestion_control=bbr from /etc/sysctl.conf
+# if we find "net.core.default_qdisc=fq" in /etc/sysctl.conf
+if sudo grep -Fq "net.core.default_qdisc=fq" /etc/sysctl.conf
+then
+   # note would be nice to get sed to do this in one line
+   # remove net.ipv4.tcp_congestion_control=bbr from /etc/sysctl.conf
+   sudo sed -i "s/^net\.core\.default_qdisc\=fq//" /etc/sysctl.conf
+   # remove trailing empty lines
+   sudo sed -Ezi '$ s/\n+$//' /etc/sysctl.conf
+   echo -e "" | sudo tee -a /etc/sysctl.conf
+   echo "net.core.default_qdisc=fq removed from /etc/sysctl.conf"
+else
+   echo "net.core.default_qdisc=fq not found in /etc/sysctl.conf"
+fi
+# if we find "net.ipv4.tcp_congestion_control=bbr" in /etc/sysctl.conf
+if sudo grep -Fq "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf
+then
+   # note would be nice to get sed to do this in one line
+   # remove net.ipv4.tcp_congestion_control=bbr from /etc/sysctl.conf
+   sudo sed -i "s/^net\.ipv4\.tcp_congestion_control\=bbr//" /etc/sysctl.conf
+   # remove trailing empty lines
+   sudo sed -Ezi '$ s/\n+$//' /etc/sysctl.conf
+   echo -e "" | sudo tee -a /etc/sysctl.conf
+   echo "net.ipv4.tcp_congestion_control=bbr removed from /etc/sysctl.conf"
+else
+   echo "net.ipv4.tcp_congestion_control=bbr not found in /etc/sysctl.conf"
+fi
+# Reload configuration
+sudo sysctl -qp
+if ! sudo grep -Fq "net.core.default_qdisc=fq" /etc/sysctl.conf && ! sudo grep -Fq "net.ipv4.tcp_congestion_control=bbr" /etc/sysctl.conf ; then echo -e "\033[0;32mSuccess\033[m" ; exit 0; else echo -e "\033[0;31mFailed\033[m" ; exit 1; fi
+EOF
+
+ls
