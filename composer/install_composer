@@ -1,8 +1,10 @@
 #!/bin/bash
 # install composer
 # Note: Multiple versions of PHP had to be disabled inorder for the composer instalation to work.
-
 # need to fix
+
+full_path=$(realpath $0);
+dir_path=$(dirname $full_path);
 
 echo "install composer";
 
@@ -13,8 +15,12 @@ wget $composer_url;
 php -d allow_url_fopen=On installer -check;
 php installer;
 rm -f installer;
-echo 'alias composer="php -d allow_url_fopen=On /home/$USER/bin/composer.phar"' >> ~/.bashrc;
+mv composer.phar composer;
+sed -i '/alias composer=.*/d' ~/.bashrc;
+echo 'alias composer="php -d allow_url_fopen=On /home/$USER/bin/composer"' >> ~/.bashrc;
 source ~/.bashrc;
-#composer -V;
+cd $dir_path;
+exec bash;
+#bash --login;
 composer self-update;
 composer -V;
