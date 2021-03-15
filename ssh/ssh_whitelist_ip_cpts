@@ -1,0 +1,96 @@
+# Copy and pase this into shell
+# allow dyndns ip through firewall
+# https://www.putorius.net/ipset-iptables-rules-for-hostname.html
+
+# upgrade packages and install dig and ipset
+if [ -x "$(command -v apt)" ]; then
+  apt update -y;
+  apt upgrade -y;
+  apt dist-upgrade -y;
+  apt install ipset -y;
+  apt install dnsutils -y;
+elif [ -x "$(command -v yum)" ]; then
+  yum install ipset -y;
+  yum install bind-utils -y;
+else
+  # no op
+  :
+fi
+
+# if ipset command found
+if [ -x "$(command -v ipset)" ]; then
+  # filename we are going to save script in
+  filename="/etc/cron.hourly/allow_ssh_ipset.sh";
+  # create $filename
+  touch $filename;
+  # make file executable
+  chmod +x $filename;
+
+  # cat this into the file created above. Ends at EOF
+  cat << EOF > $filename
+  #if dig command found
+  if [ -x "$(command -v dig)" ]; then
+    #echo "dig found";
+
+    # Check that ssh-allowed ipset exists
+    ipset -L ssh-allowed >/dev/null 2>&1;
+
+    if [ \$? -ne 0 ]; then
+      #echo "ssh-allowed does not exist";
+      ipset create ssh-allowed hash:ip;
+    else
+      #echo "ssh-allowed exists";
+      :
+    fi
+
+    # empty the ssh-allowed ipset
+    ipset flush ssh-allowed;
+
+    # add ip addresses
+    # dig +short andreboyce.com will resolve this domain to an ip address
+    # you can get one at freedns.afraid.org
+    # you need to escape the $
+
+    ipset add ssh-allowed \$(dig +short andreboyce.com);
+    #ipset add ssh-allowed \$(dig +short subdomain.freedns.com);
+
+    # - whitelist
+    # drop all ip addresses not in the ssh-allowed ipset
+    iptables -I INPUT -p tcp --dport 22 -m set ! --match-set ssh-allowed src -j DROP;
+
+    # - blacklist
+    # allow all ip addresses in the ssh-allowed ipset 
+    #iptables -I INPUT -p tcp --dport 22 -m set --match-set ssh-allowed src -j ACCEPT;
+
+    # list ssh-allowed ip addresses
+    #ipset list ssh-allowed;
+
+    # -L - List the current filter rules
+    # -vn - Display more information in the output.
+    #iptables -L -vn;
+
+    # modify last updated
+    touch $filename;
+  else
+    echo "dig not found"
+  fi
+EOF
+
+  #cat $filename;
+
+  $filename;
+
+  # add crontab entry without duplicates
+  # */5 * * * * is every 5 minutes
+  crontab -l | { cat; echo "*/5 * * * * $filename"; } | sort - | uniq - | crontab -;
+else
+  :
+  # install ipset
+  #if [ -x "$(command -v apt)" ]; then
+  #  apt install ipset -y;
+  #elif [ -x "$(command -v yum)" ]; then
+  #  yum install ipset -y;
+  #else
+  #  :
+  #fi
+fi

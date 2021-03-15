@@ -4,7 +4,6 @@
 # this script will
 # make sure all the files in /home/$USER/public_html/ belong to $USER;
 
-
 # check if user is root
 if [[ $EUID -ne 0 ]]; 
    then
