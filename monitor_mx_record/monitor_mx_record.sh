@@ -39,7 +39,7 @@ do
    MX_RECORD=$(dig +short $DOMAIN MX | sort -n | head -n 1 | awk -F' ' '{print $2}' | tr '[:upper:]' '[:lower:]');
    EXPECTED_MX_RECORD=${MX_RECORDS[$DOMAIN]};
 
-   # test {} = $EXPECTED_MX_RECORD && "match" || "no macth"
+   # test {} = $EXPECTED_MX_RECORD && "match" || "no match"
    if [ $LIVE -eq 0 ]; then
      echo $MX_RECORD | xargs -I{} test {} = $EXPECTED_MX_RECORD && : || echo "Subject: MX record for $DOMAIN, $MX_RECORD does not match $EXPECTED_MX_RECORD";
    elif [ $LIVE -eq 1 ]; then
