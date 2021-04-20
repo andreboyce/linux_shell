@@ -13,9 +13,11 @@ LIVE=1; # yes=1, no=0;
 # will send message to this email address
 EMAIL=monitor@domain.com;
 
-# MX_RECORDS is an associative array fo domain as key and expected mx record as value. MX_RECORDS['domain']='expected_value';
+# MX_RECORDS is an associative array of domain as key and expected mx record as value. MX_RECORDS['domain']='expected_value';
 unset MX_RECORDS; # empty array
 declare -A MX_RECORDS; # declare associative array
+
+# Add your own domains and expected mx records below below
 
 # Zoho
 MX_RECORDS['zoho.com']='smtpin.zoho.com.';
