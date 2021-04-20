@@ -4,6 +4,7 @@
 # This script will check the mx record of a domain name against a predefined value for a given list of domains.
 # It will sort the mx records for the domain numerically by priority and use the lowest value.
 # Make the file executable and copy it into /etc/cron.hourly
+# It assumes that dig is installed
 
 # To check the expected record for a domain e.g. google.com
 # dig +short google.com MX | sort -n | head -n 1 | awk -F' ' '{print $2}' | tr '[:upper:]' '[:lower:]'
