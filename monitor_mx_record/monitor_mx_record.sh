@@ -7,7 +7,7 @@
 # It assumes that dig is installed
 
 # To check the expected record for a domain e.g. google.com
-# dig +short google.com MX | sort -n | head -n 1 | awk -F' ' '{print $2}' | tr '[:upper:]' '[:lower:]'
+# dig google.com MX +short | sort -n | head -n 1 | awk -F' ' '{print $2}' | tr '[:upper:]' '[:lower:]'
 
 # live will send an email
 LIVE=1; # yes=1, no=0;
@@ -36,7 +36,7 @@ MX_RECORDS['google.com']='aspmx.l.google.com.';
 for DOMAIN in "${!MX_RECORDS[@]}";
 do
 
-   MX_RECORD=$(dig +short $DOMAIN MX | sort -n | head -n 1 | awk -F' ' '{print $2}' | tr '[:upper:]' '[:lower:]');
+   MX_RECORD=$(dig $DOMAIN MX +short | sort -n | head -n 1 | awk -F' ' '{print $2}' | tr '[:upper:]' '[:lower:]');
    EXPECTED_MX_RECORD=${MX_RECORDS[$DOMAIN]};
 
    # test {} = $EXPECTED_MX_RECORD && "match" || "no match"
