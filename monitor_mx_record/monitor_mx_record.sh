@@ -7,7 +7,7 @@
 # Usage
 # Make the file executable and copy it into /etc/cron.hourly
 # chmod +x monitor_mx_records.sh; mv monitor_mx_records.sh /etc/cron.hourly/monitor_mx_records.sh;
-# It assumes that dig is installed (yum install bind-utils, apt install dig -y)
+# It assumes that dig is installed (yum install bind-utils -y, apt install dnsutils -y)
 
 # To check the expected record for a domain e.g. google.com
 # dig google.com MX +short | sort -n | head -n1 | awk '{print $NF}' | tr '[:upper:]' '[:lower:]'
