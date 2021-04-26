@@ -2,26 +2,23 @@
 # install node
 add_to_path()
 {
-    #echo \${1} is ${1};
     if [[ "$PATH" =~ (^|:)"${1}"(:|$) ]]
     then
         echo ${1} exists in PATH=\"$PATH\";
         return 0;
     fi
-    #echo PATH is $PATH;
     yes | cp --backup=numbered ~/.bash_profile ~/.bash_profile.bak;
-    export PATH=$PATH:${1};
     sed -i '/export PATH/d' ~/.bash_profile;
     echo "export PATH=$PATH:${1}" >> ~/.bash_profile;
     source ~/.bash_profile;
-    cat ~/.bash_profile;
+    echo type "source ~/.bash_profile";
 }
 echo "install node";
 node_file="nodejs.tar.gz";
 cd ~
 mkdir bin
 cd bin
-rm -f node  
+rm -f node
 rm -f npm
 rm -rf nodejs
 wget -r -nd -l1 --no-parent -e robots=off -A "*linux-x64.tar.gz" https://nodejs.org/dist/latest/
@@ -34,3 +31,5 @@ ln -s ./nodejs/lib/node_modules/npm/bin/npm-cli.js npm;
 add_to_path $(pwd);
 node --version;
 npm --version;
+
+
