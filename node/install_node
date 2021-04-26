@@ -2,11 +2,19 @@
 # install node
 add_to_path()
 {
+    #echo \${1} is ${1};
     if [[ "$PATH" =~ (^|:)"${1}"(:|$) ]]
     then
-        return 0
+        echo ${1} exists in PATH=\"$PATH\";
+        return 0;
     fi
-    export PATH=${1}:$PATH
+    #echo PATH is $PATH;
+    yes | cp --backup=numbered ~/.bash_profile ~/.bash_profile.bak;
+    export PATH=$PATH:${1};
+    sed -i '/export PATH/d' ~/.bash_profile;
+    echo "export PATH=$PATH:${1}" >> ~/.bash_profile;
+    source ~/.bash_profile;
+    cat ~/.bash_profile;
 }
 echo "install node";
 node_file="nodejs.tar.gz";
