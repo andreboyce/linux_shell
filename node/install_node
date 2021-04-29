@@ -7,10 +7,10 @@ add_to_path()
         echo ${1} exists in PATH=\"$PATH\";
         return 0;
     fi
-    yes | cp --backup=numbered ~/.bash_profile ~/.bash_profile.bak;
-    sed -i '/export PATH/d' ~/.bash_profile;
-    echo "export PATH=$PATH:${1}" >> ~/.bash_profile;
-    source ~/.bash_profile;
+    yes | cp --backup=numbered ~/.bashrc ~/.bashrc.bak;
+    sed -i '/export PATH/d' ~/.bashrc;
+    echo "export PATH=$PATH:${1}" >> ~/.bashrc;
+    source ~/.bashrc;
 }
 echo "install node";
 node_file="nodejs.tar.gz";
@@ -30,5 +30,5 @@ ln -s ./nodejs/lib/node_modules/npm/bin/npm-cli.js npm;
 add_to_path $(pwd);
 node --version;
 npm --version;
-echo type "source ~/.bash_profile";
+echo type "source ~/.bashrc";
 
